@@ -178,7 +178,7 @@ body {
     grid-column: span 5 / span 5;
 }
 
-.invoices{
+.invoices, .customers, .products{
     grid-column: span 5 / span 5;
     grid-row: span 10 / span 10;
     grid-row-start: 2;
@@ -188,17 +188,17 @@ body {
     gap: 8px;
 }
 
-.invoice-header {
+.invoice-header, .customer-header, .products-header {
     grid-column: span 5 / span 5;
 }
 
-.invoice-container {
+.invoice-container, .customer-container, .products-container {
     grid-column: span 5 / span 5;
     grid-row: span 8 / span 8;
     grid-row-start: 2;
 }
 
-.invoice-footer {
+.invoice-footer, .customer-footer, .products-footer {
     grid-column: span 5 / span 5;
     grid-row-start: 10;
 }

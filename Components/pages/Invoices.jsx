@@ -4,17 +4,31 @@ import { addUserDetails, clearUserDetails } from '../../src/slices/userslices';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { ToastContainer } from 'react-bootstrap';
+import { Link, useNavigate } from 'react-router-dom';
 
 const serverUrl = import.meta.env.VITE_SERVER_URL;
 
 export default function Invoices() {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const userInfo = useSelector((state) => state.userDetails?.user);
     const [fetched, setFetched] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [invoices, setInvoices] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [totalRecords, setTotalRecords] = useState(0);
+    const [pageSize, setPageSize] = useState(10);
+    const [sortField, setSortField] = useState('createdAt');
+    const [sortOrder, setSortOrder] = useState('desc');
+
+    const formatDate = (isoString) => {
+        let date = new Date(isoString);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}-${month}-${year}`;
+    };
 
     if (!userInfo) {
         const fetchUserDetails = async () => {
@@ -47,10 +61,12 @@ export default function Invoices() {
         try {
             const response = await axios.get(`${serverUrl}/invoice`, {
                 params: {
-                    userId: userInfo._id,
+                    userId: userInfo?._id,
                     search: searchTerm,
                     page,
-                    limit: 10,
+                    limit: pageSize,
+                    sortField,
+                    sortOrder,
                 },
             });
 
@@ -58,12 +74,20 @@ export default function Invoices() {
                 setInvoices(response.data?.data);
                 setCurrentPage(response.data?.pagination?.currentPage);
                 setTotalPages(response.data?.pagination?.totalPages);
+                setTotalRecords(response.data?.pagination?.totalRecords);
             } else {
                 throw new Error(response.data.message);
             }
         } catch (error) {
-            console.error("Error fetching invoices:", error);
-            toast.error("Error fetching invoices");
+            if (error.response?.data?.message === "No invoices found matching the search term!") {
+                setInvoices([])
+                setCurrentPage(1);
+                setTotalPages(1);
+                setTotalRecords(0);
+            } else {
+                toast.error("Error fetching invoices");
+                console.error("Error fetching invoices:", error);
+            }
         }
     };
 
@@ -72,7 +96,23 @@ export default function Invoices() {
     };
 
     const handlePageChange = (page) => {
+        setCurrentPage(page);
         fetchInvoices(page);
+    };
+
+    const handlePageSizeChange = (size) => {
+        setPageSize(size);
+        fetchInvoices();
+    };
+
+    const handleSort = (field) => {
+        if (field === sortField) {
+            setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortField(field);
+            setSortOrder('desc');
+        }
+        fetchInvoices();
     };
 
     useEffect(() => {
@@ -81,7 +121,10 @@ export default function Invoices() {
         }
     }, [userInfo]);
 
-    console.log(invoices)
+    const pagination = [];
+    for (let i = 1; i <= totalPages; i++) {
+        pagination.push(i);
+    }
 
     return (
         <div className='invoices px-5'>
@@ -106,53 +149,69 @@ export default function Invoices() {
                             Search
                         </button>
                     </div>
-                    <button type='button' className='w-60 bg-success btn h-10 text-white'>Add new invoices</button>
+                    <Link to="app/newinvoice">
+                        <button type='button' className='w-60 bg-success btn h-10 text-white hover:opacity-80 active:opacity-65'>Add new invoices</button>
+                    </Link>
                 </div>
             </div>
             <div className='invoice-container'>
                 <table className="table">
                     <thead className='tableTitle'>
                         <tr>
-                            <th className='text-black poppins-semibold' scope="col">#</th>
-                            <th className='text-black poppins-semibold' scope="col">Customer</th>
-                            <th className='text-black poppins-semibold' scope="col">Invoice Amount</th>
-                            <th className='text-black poppins-semibold' scope="col">Action</th>
+                            <th className='text-black poppins-semibold cursor-pointer' scope="col" onClick={() => handleSort('invoiceNumber')}>NO. {sortField === 'invoiceNumber' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
+                            <th className='text-black poppins-semibold cursor-pointer' scope="col" onClick={() => handleSort('clientName')}>CUSTOMER {sortField === 'clientName' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
+                            <th className='text-black poppins-semibold cursor-pointer' scope="col" onClick={() => handleSort('createdAt')}>DATE {sortField === 'createdAt' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
+                            <th className='text-black poppins-semibold cursor-pointer' scope="col" onClick={() => handleSort('invoiceDate')}>DUE DATE {sortField === 'invoiceDate' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
+                            <th className='text-black poppins-semibold cursor-pointer' scope="col" onClick={() => handleSort('total')}>AMOUNT {sortField === 'total' && (sortOrder === 'asc' ? '↑' : '↓')}</th>
+                            <th className='text-black poppins-semibold' scope="col">ACTION</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {invoices.map((invoice, index) => (
-                            <tr key={invoice._id} className='cursor-pointer'>
-                                <th scope="row">{(currentPage - 1) * 10 + index + 1}</th>
-                                <td>{invoice.clientName}</td>
-                                <td>{invoice.total}</td>
-                                <td className='flex'>
-                                    <div>
-                                        <button type='button' className='mx-2'>
-                                            <img src="./delete.png" className='w-6 delete hover:opacity-70' alt="Delete btn" />
-                                        </button>
-                                        <button type='button' className='mx-2'>
-                                            <img src="/edit.png" className='w-6 hover:opacity-70' alt="Edit btn" />
-                                        </button>
-                                    </div>
-                                </td>
+                        {invoices && invoices.length > 0 ? (
+                            invoices.map((invoice, index) => (
+                                <tr key={invoice._id} className='cursor-pointer'>
+                                    <th>{invoice.invoiceNumber}</th>
+                                    <td>{invoice.clientName}</td>
+                                    <td>{formatDate(invoice.createdAt)}</td>
+                                    <td>{formatDate(invoice.invoiceDate)}</td>
+                                    <td>{invoice.total}</td>
+                                    <td className='flex'>
+                                        <div>
+                                            <button type='button' className='mx-2'>
+                                                <img src="/delete.png" className='w-6 delete hover:opacity-70' alt="Delete btn" />
+                                            </button>
+                                            <button type='button' className='mx-2'>
+                                                <img src="/edit.png" className='w-6 hover:opacity-70' alt="Edit btn" />
+                                            </button>
+                                            <button type='button' className='mx-2'>
+                                                <img src="/printer.png" className='w-6 hover:opacity-70' alt="Print btn" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan={6} className="text-center py-4 text-gray-500">No Data found</td>
                             </tr>
-                        ))}
+                        )}
+
                     </tbody>
                 </table>
-                <div className="pagination">
-                    
-                </div>
             </div>
-            <div className='invoice-footer border flex justify-end items-center'>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                        <button
-                            key={page}
-                            className={`mx-2 ${currentPage === page ? 'bg-blue-500 text-white w-10 h-10 rounded' : ''}`}
-                            onClick={() => handlePageChange(page)}
-                        >
-                            {page}
-                        </button>
-                    ))}
+            <div className="pagination invoice-footer flex items-center justify-end px-5">
+                <select value={pageSize} onChange={(e) => handlePageSizeChange(e.target.value)}>
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="50">50</option>
+                </select>
+                <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>Prev</button>
+                {pagination.map((page) => (
+                    <button key={page} className={`mx-2 ${currentPage === page ? 'bg-blue-500 text-white w-10 h-10 rounded' : ''}`} onClick={() => handlePageChange(page)}>
+                        {page}
+                    </button>
+                ))}
+                <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>Next</button>
             </div>
             <ToastContainer />
         </div>
