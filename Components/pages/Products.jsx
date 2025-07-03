@@ -80,13 +80,13 @@ export default function Products() {
                 throw new Error(response.data.message);
             }
         } catch (error) {
-            if (error.response?.data?.message === "Item not found") {
+            if (error.response?.data?.message === "No items found!") {
                 setItems([])
                 setCurrentPage(1);
                 setTotalPages(1);
                 setTotalRecords(0);
             } else {
-                toast.error("Error fetching items");
+                toast.error(error.response?.data?.message);
                 console.error("Error fetching items:", error);
             }
         }
@@ -98,11 +98,10 @@ export default function Products() {
     };
 
     const handleCreateItem = async () => {
-        debugger
         if (!newItem.ProductName || !newItem.Cost || !newItem.InitialQty) {
-                    toast.error("The ProductName, InitialQty and Cost are required");
-                    return
-                }
+            toast.error("The ProductName, InitialQty and Cost are required");
+            return
+        }
         try {
             const response = await axios.post(`${serverUrl}/item`, {
                 ...newItem,
@@ -172,7 +171,7 @@ export default function Products() {
 
     const handleEditItem = async (id) => {
         try {
-            const response = await axios.get(`${serverUrl}/item/${id}`);
+            const response = await axios.get(`${serverUrl}/items/${id}`);
             if (response.status && response.data?.data) {
                 setNewItem(response.data.data);
                 setItemId(id);
@@ -186,6 +185,8 @@ export default function Products() {
             console.error("Error fetching item details:", error);
         }
     };
+
+    const excludedProperties = ['_id', '__v', 'userId'];
 
     const handleSearch = () => {
         fetchItems();
@@ -258,11 +259,11 @@ export default function Products() {
                             </div>
                             <div className="modal-body">
                                 <form>
-                                    {Object.keys(newItem).map((key) => (
+                                    {Object.keys(newItem).filter(key => !excludedProperties.includes(key)).map((key) => (
                                         <div key={key} className="mb-3">
                                             <label className="col-form-label">{key}</label>
                                             <input
-                                                type="text"
+                                                type={typeof newItem[key] === 'number' ? 'number' : 'text'}
                                                 className="form-control"
                                                 name={key}
                                                 value={newItem[key]}

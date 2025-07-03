@@ -116,7 +116,7 @@ export default function Customers() {
                 throw new Error(response.data.message);
             }
         } catch (error) {
-            toast.error("Error fetching customer details");
+            toast.error(error.response.data?.message);
             console.error("Error fetching customer details:", error);
         }
     };

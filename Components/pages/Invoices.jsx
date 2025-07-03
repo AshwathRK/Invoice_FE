@@ -79,13 +79,13 @@ export default function Invoices() {
                 throw new Error(response.data.message);
             }
         } catch (error) {
-            if (error.response?.data?.message === "No invoices found matching the search term!") {
+            if (error.response?.data?.message === "No invoices found for the user!") {
                 setInvoices([])
                 setCurrentPage(1);
                 setTotalPages(1);
                 setTotalRecords(0);
             } else {
-                toast.error("Error fetching invoices");
+                toast.error(error.response.data?.message);
                 console.error("Error fetching invoices:", error);
             }
         }
@@ -149,7 +149,7 @@ export default function Invoices() {
                             Search
                         </button>
                     </div>
-                    <Link to="app/newinvoice">
+                    <Link to="/app/newinvoice">
                         <button type='button' className='w-60 bg-success btn h-10 text-white hover:opacity-80 active:opacity-65'>Add new invoices</button>
                     </Link>
                 </div>
@@ -183,9 +183,11 @@ export default function Invoices() {
                                             <button type='button' className='mx-2'>
                                                 <img src="/edit.png" className='w-6 hover:opacity-70' alt="Edit btn" />
                                             </button>
-                                            <button type='button' className='mx-2'>
-                                                <img src="/printer.png" className='w-6 hover:opacity-70' alt="Print btn" />
-                                            </button>
+                                            <Link to={`/app/print-pdf/${invoice._id}`}>
+                                                <button type='button' className='mx-2'>
+                                                    <img src="/printer.png" className='w-6 hover:opacity-70' alt="Print btn" />
+                                                </button>
+                                            </Link>
                                         </div>
                                     </td>
                                 </tr>
