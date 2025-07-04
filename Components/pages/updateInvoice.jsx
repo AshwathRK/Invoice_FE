@@ -32,7 +32,6 @@ const UpdateInvoice = () => {
 
     useEffect(() => {
         const fetchCustomers = async () => {
-            debugger
             try {
                 const response = await axios.get(`${serverUrl}/customer/${userInfo?._id}`);
                 if (response?.status && response.data?.data) {
@@ -67,7 +66,6 @@ const UpdateInvoice = () => {
 
     useEffect(() => {
         const fetchInvoice = async () => {
-            debugger
             try {
                 const response = await axios.get(`${serverUrl}/invoice/${id.invoiceId}`);
                 if (response?.status && response.data?.data) {
@@ -170,7 +168,6 @@ const UpdateInvoice = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            debugger
             const response = await axios.put(`${serverUrl}/invoice/${id.invoiceId}`, {
                 clientName,
                 userId: userInfo?._id,
