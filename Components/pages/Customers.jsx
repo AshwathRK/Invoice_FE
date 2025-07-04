@@ -61,7 +61,7 @@ export default function Customers() {
                 }
             } catch (error) {
                 console.error("Error in fetchUserDetails:", error);
-                toast.error("Session expired, please log in again");
+                // toast.error("Session expired, please log in again");
                 dispatch(clearUserDetails());
                 localStorage.setItem('isAuthenticated', 'false');
                 navigate('/login');
