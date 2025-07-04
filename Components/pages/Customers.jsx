@@ -60,7 +60,7 @@ export default function Customers() {
                     throw new Error(response.data.message);
                 }
             } catch (error) {
-                console.error("Error in fetchUserDetails:", error);
+                // console.error("Error in fetchUserDetails:", error);
                 // toast.error("Session expired, please log in again");
                 dispatch(clearUserDetails());
                 localStorage.setItem('isAuthenticated', 'false');
@@ -102,7 +102,7 @@ export default function Customers() {
                 setTotalRecords(0);
             } else {
                 toast.error("Error fetching customers");
-                console.error("Error fetching customers:", error);
+                // console.error("Error fetching customers:", error);
             }
         }
     };
@@ -117,7 +117,7 @@ export default function Customers() {
             }
         } catch (error) {
             toast.error(error.response.data?.message);
-            console.error("Error fetching customer details:", error);
+            // console.error("Error fetching customer details:", error);
         }
     };
 
@@ -194,7 +194,7 @@ export default function Customers() {
             }
         } catch (error) {
             toast.error(error.response?.data?.message);
-            console.error("Error creating customer:", error);
+            // console.error("Error creating customer:", error);
         }
     };
 
@@ -233,7 +233,7 @@ export default function Customers() {
             }
         } catch (error) {
             toast.error("Error updating customer");
-            console.error("Error updating customer:", error);
+            // console.error("Error updating customer:", error);
         }
     };
 
@@ -276,7 +276,7 @@ export default function Customers() {
             }
         } catch (error) {
             toast.error("Error deleting customer");
-            console.error("Error deleting customer:", error);
+            // console.error("Error deleting customer:", error);
         }
     };
 

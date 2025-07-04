@@ -37,7 +37,7 @@ const PrintPDF = () => {
                 }
             } catch (err) {
                 setError('Something went wrong');
-                console.error(err);
+                // console.error(err);
             } finally {
                 setLoading(false);
             }

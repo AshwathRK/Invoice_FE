@@ -44,7 +44,7 @@ export default function Invoices() {
                     throw new Error(response.data.message);
                 }
             } catch (error) {
-                console.error("Error in fetchUserDetails:", error);
+                // console.error("Error in fetchUserDetails:", error);
                 dispatch(clearUserDetails());
                 localStorage.setItem('isAuthenticated', 'false');
                 navigate('/login');
@@ -85,7 +85,7 @@ export default function Invoices() {
                 setTotalRecords(0);
             } else {
                 toast.error(error.response?.data?.message || "Failed to fetch invoices.");
-                console.error("Error fetching invoices:", error);
+                // console.error("Error fetching invoices:", error);
             }
         }
     };

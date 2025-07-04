@@ -40,7 +40,7 @@ const UpdateInvoice = () => {
                     throw new Error(response.data.message);
                 }
             } catch (error) {
-                console.error("Error fetching customers:", error);
+                // console.error("Error fetching customers:", error);
             }
         };
         fetchCustomers();
@@ -56,7 +56,7 @@ const UpdateInvoice = () => {
                     throw new Error(response.data.message);
                 }
             } catch (error) {
-                console.error("Error fetching products:", error);
+                // console.error("Error fetching products:", error);
             }
         };
         if (userInfo?._id) {
@@ -92,7 +92,7 @@ const UpdateInvoice = () => {
                     throw new Error(response.data.message);
                 }
             } catch (error) {
-                console.error("Error fetching invoice:", error);
+                // console.error("Error fetching invoice:", error);
             }
         };
         if (id) {
@@ -182,7 +182,7 @@ const UpdateInvoice = () => {
                 notes,
                 status,
             });
-            console.log(response.data);
+            // console.log(response.data);
             toast.success("Invoice Updated Successfully!");
 
             setTimeout(function () {
@@ -190,7 +190,7 @@ const UpdateInvoice = () => {
             }, 2000);
 
         } catch (error) {
-            console.error(error);
+            // console.error(error);
             toast.error(error.response.data?.message);
         }
     };
@@ -218,7 +218,7 @@ const UpdateInvoice = () => {
             // Navigate to the print page
             navigate(`/app/print-pdf/${response.data?.invoice?._id}`);
         } catch (error) {
-            console.error(error);
+            // console.error(error);
         }
     };
 

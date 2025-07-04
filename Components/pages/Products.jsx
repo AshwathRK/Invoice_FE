@@ -46,7 +46,7 @@ export default function Products() {
                     throw new Error(response.data.message);
                 }
             } catch (error) {
-                console.error("Error in fetchUserDetails:", error);
+                // console.error("Error in fetchUserDetails:", error);
                 toast.error("Session expired, please log in again");
                 dispatch(clearUserDetails());
                 localStorage.setItem('isAuthenticated', 'false');
@@ -87,7 +87,7 @@ export default function Products() {
                 setTotalRecords(0);
             } else {
                 toast.error(error.response?.data?.message);
-                console.error("Error fetching items:", error);
+                // console.error("Error fetching items:", error);
             }
         }
     };
@@ -124,7 +124,7 @@ export default function Products() {
             }
         } catch (error) {
             toast.error(error.response?.data?.message);
-            console.error("Error creating item:", error);
+            // console.error("Error creating item:", error);
         }
     };
 
@@ -150,7 +150,7 @@ export default function Products() {
             }
         } catch (error) {
             toast.error("Error updating item");
-            console.error("Error updating item:", error);
+            // console.error("Error updating item:", error);
         }
     };
 
@@ -165,7 +165,7 @@ export default function Products() {
             }
         } catch (error) {
             toast.error("Error deleting item");
-            console.error("Error deleting item:", error);
+            // console.error("Error deleting item:", error);
         }
     };
 
@@ -182,7 +182,7 @@ export default function Products() {
             }
         } catch (error) {
             toast.error("Error fetching item details");
-            console.error("Error fetching item details:", error);
+            // console.error("Error fetching item details:", error);
         }
     };
 
