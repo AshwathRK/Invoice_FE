@@ -207,7 +207,7 @@ body {
     filter: brightness(0) invert(1);
 }
 
-.newInvoices{
+.newInvoices, .updateInvoices{
     grid-column: span 5 / span 5;
     grid-row: span 10 / span 10;
     grid-row-start: 2;

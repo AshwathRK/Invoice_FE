@@ -2,14 +2,15 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { toast, ToastContainer } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const serverUrl = import.meta.env.VITE_SERVER_URL;
 
-const NewInvoice = () => {
+const UpdateInvoice = () => {
     const [customers, setCustomers] = useState([]);
     const [selectedCustomer, setSelectedCustomer] = useState({});
     const navigate = useNavigate();
+    const  id  = useParams();
     const userInfo = useSelector((state) => state.userDetails?.user);
     const [clientName, setClientName] = useState('');
     const [clientAddress, setClientAddress] = useState('');
@@ -21,7 +22,6 @@ const NewInvoice = () => {
     const [dueDate, setDueDate] = useState('');
     const [items, setItems] = useState([
         { itemId: '', description: '', quantity: 0, unitPrice: 0, amount: 0, isActive: true },
-        { itemId: '', description: '', quantity: 0, unitPrice: 0, amount: 0, isActive: false },
     ]);
     const [subTotal, setSubTotal] = useState(0);
     const [tax, setTax] = useState(0);
@@ -30,9 +30,9 @@ const NewInvoice = () => {
     const [status, setStatus] = useState('draft');
     const [products, setProducts] = useState([]);
 
-
     useEffect(() => {
         const fetchCustomers = async () => {
+            debugger
             try {
                 const response = await axios.get(`${serverUrl}/customer/${userInfo?._id}`);
                 if (response?.status && response.data?.data) {
@@ -65,6 +65,43 @@ const NewInvoice = () => {
         }
     }, [userInfo]);
 
+    useEffect(() => {
+        const fetchInvoice = async () => {
+            debugger
+            try {
+                const response = await axios.get(`${serverUrl}/invoice/${id.invoiceId}`);
+                if (response?.status && response.data?.data) {
+                    const invoice = response.data.data;
+                    setClientName(invoice.clientName);
+                    setClientAddress(invoice.clientAddress);
+                    setClientEmail(invoice.clientEmail);
+                    setClientPhone(invoice.clientPhone);
+                    setclientId(invoice.customerId);
+                    setInvoiceNumber(invoice.invoiceNumber);
+                    setInvoiceDate(new Date(invoice.invoiceDate));
+                    setDueDate(invoice.dueDate);
+                    setItems(invoice.items.map(item => ({ ...item, isActive: true })));
+                    setSubTotal(invoice.subTotal);
+                    setTax(invoice.tax);
+                    setTotal(invoice.total);
+                    setNotes(invoice.notes);
+                    setStatus(invoice.status);
+                    const customer = customers.find(c => c._id === invoice.customerId);
+                    if (customer) {
+                        setSelectedCustomer(customer);
+                    }
+                } else {
+                    throw new Error(response.data.message);
+                }
+            } catch (error) {
+                console.error("Error fetching invoice:", error);
+            }
+        };
+        if (id) {
+            fetchInvoice();
+        }
+    }, [id, customers]);
+
     const handleCustomerChange = (customerId) => {
         const selectedCustomer = customers.find((customer) => customer._id === customerId);
         if (selectedCustomer) {
@@ -94,8 +131,8 @@ const NewInvoice = () => {
         if (field === 'itemId') {
             const selectedProduct = products.find(product => product._id === value);
             newItems[index].description = selectedProduct?.ProductName || '';
-            newItems[index].unitPrice = selectedProduct?.Cost || Cost || 0;
-            newItems[index].amount = newItems[index].InitialQty * newItems[index].unitPrice;
+            newItems[index].unitPrice = selectedProduct?.Cost || 0;
+            newItems[index].amount = newItems[index].quantity * newItems[index].unitPrice;
         }
         if (field === 'quantity' || field === 'unitPrice') {
             newItems[index].amount = newItems[index].quantity * newItems[index].unitPrice;
@@ -131,16 +168,13 @@ const NewInvoice = () => {
     };
 
     const handleSubmit = async (e) => {
-        debugger
         e.preventDefault();
         try {
-            const response = await axios.post(`${serverUrl}/invoice`, {
+            debugger
+            const response = await axios.put(`${serverUrl}/invoice/${id.invoiceId}`, {
                 clientName,
                 userId: userInfo?._id,
                 customerId,
-                clientAddress,
-                clientEmail,
-                clientPhone,
                 invoiceNumber,
                 invoiceDate,
                 dueDate,
@@ -152,7 +186,7 @@ const NewInvoice = () => {
                 status,
             });
             console.log(response.data);
-            toast.success("Invoice Created Successfully!");
+            toast.success("Invoice Updated Successfully!");
 
             setTimeout(function () {
                 navigate('/');
@@ -170,7 +204,7 @@ const NewInvoice = () => {
 
     const handlePrint = async () => {
         try {
-            const response = await axios.post(`${serverUrl}/invoice`, {
+            const response = await axios.put(`${serverUrl}/invoice/${id}`, {
                 clientName,
                 userId: userInfo?._id,
                 customerId,
@@ -192,8 +226,8 @@ const NewInvoice = () => {
     };
 
     return (
-        <div className="newInvoices px-10 my-10">
-            <h2 className="text-2xl font-bold mb-4">Create Invoice</h2>
+        <div className="updateInvoices px-10 my-10">
+            <h2 className="text-2xl font-bold mb-4">Update Invoice</h2>
             <form onSubmit={handleSubmit}>
                 <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
@@ -279,7 +313,7 @@ const NewInvoice = () => {
                                     <input type="number" value={item.amount} readOnly className="block w-full p-2 border border-gray-300 rounded-lg" />
                                 </td>
                                 <td className="border px-4 py-2">
-                                    {items.length > 2 && index !== items.length - 1 && (
+                                    {items.length > 1 && index !== items.length - 1 && (
                                         <button type="button" onClick={(e) => { e.stopPropagation(); removeItem(index); }} className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">X</button>
                                     )}
                                 </td>
@@ -308,12 +342,12 @@ const NewInvoice = () => {
                     </div>
                 </div>
                 <div className='flex w-full justify-end'>
-                    <button type="submit" className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg">Save Invoice</button>
-                    <button type="button" onClick={() => handlePrint()} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg mr-4">Save and Print</button>
+                    <button type="submit" className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg">Update Invoice</button>
+                    <button type="button" onClick={() => handlePrint()} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg mr-4">Update and Print</button>
                 </div>
             </form>
         </div>
     );
 };
 
-export default NewInvoice;
+export default UpdateInvoice;

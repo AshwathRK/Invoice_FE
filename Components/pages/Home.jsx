@@ -6,6 +6,7 @@ import NewInvoice from './NewInvoice'
 import Customers from './Customers'
 import Products from './Products'
 import PrintPDF from './PrintPDF'
+import UpdateInvoice from './updateInvoice'
 
 export default function Home() {
   return (
@@ -15,6 +16,7 @@ export default function Home() {
                 <Route path="/" element={<Invoices />} />
                 <Route path="invoices" element={<Invoices />} />
                 <Route path="newinvoice" element={<NewInvoice />} />
+                <Route path="/updateinvoice/:invoiceId" element={<UpdateInvoice />} />
                 <Route path="/print-pdf/:invoiceId" element={<PrintPDF />} />
                 <Route path="customers" element={<Customers />} />
                 <Route path="items" element={<Products />} />

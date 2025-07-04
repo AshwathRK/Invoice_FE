@@ -1,74 +1,72 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
+import html2pdf from 'html2pdf.js'; // import html2pdf
 
 const serverUrl = import.meta.env.VITE_SERVER_URL;
-const userInfo = JSON.parse(localStorage.getItem('userInfo')); // Assuming you store user info in local storage
 
 const PrintPDF = () => {
     const { invoiceId } = useParams();
-    const [invoiceData, setInvoiceData] = useState(null);
-    const [customers, setCustomers] = useState([]);
+    const [invoiceData, setInvoiceData] = useState({});
+    const [customer, setCustomer] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const invoiceRef = useRef(); // ref for invoice container
 
     useEffect(() => {
-        const fetchInvoiceData = async () => {
+        const fetchData = async () => {
             try {
                 const response = await fetch(`${serverUrl}/invoice/${invoiceId}`);
                 const data = await response.json();
 
                 if (response.ok) {
                     setInvoiceData(data);
+                    try {
+                        const customerResponse = await axios.get(`${serverUrl}/customers/${data.data?.customerId}`);
+                        if (customerResponse?.status === 200 && customerResponse.data?.data) {
+                            setCustomer(customerResponse.data.data);
+                        } else {
+                            throw new Error(customerResponse.data.message);
+                        }
+                    } catch (error) {
+                        console.error("Error fetching customers:", error);
+                        setError("Error fetching customer data");
+                    }
                 } else {
                     setError(data.message || 'Failed to fetch invoice');
                 }
             } catch (err) {
                 setError('Something went wrong');
                 console.error(err);
+            } finally {
+                setLoading(false);
             }
         };
 
-        fetchInvoiceData();
+        fetchData();
     }, [invoiceId]);
 
-    console.log(invoiceData)
-
-    useEffect(() => {
-        const fetchCustomers = async () => {
-            try {
-                debugger
-                const response = await axios.get(`${serverUrl}/customer/${invoiceData.data?.customerId}`);
-                if (response?.status === 200 && response.data?.data) {
-                    setCustomers(response.data.data);
-                } else {
-                    throw new Error(response.data.message);
-                }
-            } catch (error) {
-                console.error("Error fetching customers:", error);
-            }
+    const handleExportPDF = () => {
+        const element = invoiceRef.current;
+        const opt = {
+            margin:       0.5,
+            filename:     `Invoice_${invoice?.invoiceNumber || 'Export'}.pdf`,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2 },
+            jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
         };
-        fetchCustomers();
-    }, [invoiceData]);
 
-    useEffect(() => {
-        if (invoiceData && customers.length > 0) {
-            setLoading(false);
-        } else if (invoiceData) {
-            setLoading(false);
-        }
-    }, [invoiceData, customers]);
+        html2pdf().set(opt).from(element).save();
+    };
 
     if (loading) return <p>Loading...</p>;
     if (error) return <p>{error}</p>;
     if (!invoiceData?.data) return <p>No invoice data found.</p>;
 
     const invoice = invoiceData.data;
-    const customer = customers.find(c => c._id === invoice.customerId);
-    console.log(customer)
 
     return (
-        <div className='newInvoices px-10'>
+        <div className='newInvoices px-20' ref={invoiceRef}>
             <h2 style={{ textAlign: 'center' }}>Invoice</h2>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
@@ -82,8 +80,10 @@ const PrintPDF = () => {
                     <h4>To:</h4>
                     {customer ? (
                         <>
-                            <p><strong>{customer.customerName}</strong></p>
-                            <p>{customer.address}</p>
+                            <p><strong>{customer.FirstName}</strong></p>
+                            <p><strong>{customer.Email}</strong></p>
+                            <p><strong>{customer.Phone}</strong></p>
+                            <p>{invoice.clientAddress}</p>
                         </>
                     ) : (
                         <>
@@ -99,7 +99,6 @@ const PrintPDF = () => {
                     <p><strong>Invoice Number:</strong> {invoice.invoiceNumber}</p>
                     <p><strong>Invoice Date:</strong> {new Date(invoice.invoiceDate).toISOString().split('T')[0]}</p>
                     <p><strong>Due Date:</strong> {new Date(invoice.dueDate).toISOString().split('T')[0]}</p>
-
                 </div>
             </div>
 
@@ -133,7 +132,8 @@ const PrintPDF = () => {
             </div>
 
             <div style={{ marginTop: '30px', textAlign: 'center' }}>
-                <button onClick={() => window.print()} style={printButtonStyle}>Print Invoice</button>
+                <button onClick={() => window.print()} style={{ ...printButtonStyle, marginRight: '10px' }}>Print Invoice</button>
+                <button onClick={handleExportPDF} style={printButtonStyle}>Export PDF</button>
             </div>
         </div>
     );

@@ -44,7 +44,7 @@ export default function NavbarComponent() {
                         <NavLink
                             to="/app/invoices"
                             className={({ isActive }) =>
-                                `font-medium text-black pb-1 transition duration-300 ${
+                                `font-medium text-black transition duration-300 ${
                                     isActive
                                         ? 'border-b-2 border-black'
                                         : 'hover:border-b-2 hover:border-black'
@@ -56,7 +56,7 @@ export default function NavbarComponent() {
                         <NavLink
                             to="/app/customers"
                             className={({ isActive }) =>
-                                `font-medium text-black pb-1 transition duration-300 ${
+                                `font-medium text-black transition duration-300 ${
                                     isActive
                                         ? 'border-b-2 border-black'
                                         : 'hover:border-b-2 hover:border-black'
@@ -68,7 +68,7 @@ export default function NavbarComponent() {
                         <NavLink
                             to="/app/items"
                             className={({ isActive }) =>
-                                `font-medium text-black pb-1 transition duration-300 ${
+                                `font-medium text-black transition duration-300 ${
                                     isActive
                                         ? 'border-b-2 border-black'
                                         : 'hover:border-b-2 hover:border-black'

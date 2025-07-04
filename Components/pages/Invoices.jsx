@@ -21,6 +21,8 @@ export default function Invoices() {
     const [pageSize, setPageSize] = useState(10);
     const [sortField, setSortField] = useState('createdAt');
     const [sortOrder, setSortOrder] = useState('desc');
+    const [showModal, setShowModal] = useState(false);
+    const [invoiceToDelete, setInvoiceToDelete] = useState(null);
 
     const formatDate = (isoString) => {
         let date = new Date(isoString);
@@ -126,6 +128,39 @@ export default function Invoices() {
         pagination.push(i);
     }
 
+    const deleteInvoice = async (invoiceid) => {
+        try {
+            const response = await axios.delete(`${serverUrl}/invoice/${invoiceid}`)
+            if (response) {
+                toast.success(response.data.message)
+                fetchInvoices();
+            } else {
+                toast.error("Something went wrong!")
+            }
+        } catch (error) {
+            console.log(error.response?.data.message)
+            toast.error(error.response?.data.message)
+        }
+    }
+
+    const handleDelete = (invoiceId) => {
+        setInvoiceToDelete(invoiceId);
+        setShowModal(true);
+    };
+
+    const confirmDelete = () => {
+        if (invoiceToDelete) {
+            deleteInvoice(invoiceToDelete);
+            setInvoiceToDelete(null);
+            setShowModal(false);
+        }
+    };
+
+    const cancelDelete = () => {
+        setInvoiceToDelete(null);
+        setShowModal(false);
+    };
+
     return (
         <div className='invoices px-5'>
             <div className='invoice-header flex justify-between items-center'>
@@ -177,12 +212,14 @@ export default function Invoices() {
                                     <td>{invoice.total}</td>
                                     <td className='flex'>
                                         <div>
-                                            <button type='button' className='mx-2'>
+                                            <button type='button' className='mx-2' onClick={() => handleDelete(invoice._id)}>
                                                 <img src="/delete.png" className='w-6 delete hover:opacity-70' alt="Delete btn" />
                                             </button>
-                                            <button type='button' className='mx-2'>
-                                                <img src="/edit.png" className='w-6 hover:opacity-70' alt="Edit btn" />
-                                            </button>
+                                            <Link to = {`/app/updateinvoice/${invoice._id}`}>
+                                                <button type='button' className='mx-2'>
+                                                    <img src="/edit.png" className='w-6 hover:opacity-70' alt="Edit btn" />
+                                                </button>
+                                            </Link>
                                             <Link to={`/app/print-pdf/${invoice._id}`}>
                                                 <button type='button' className='mx-2'>
                                                     <img src="/printer.png" className='w-6 hover:opacity-70' alt="Print btn" />
@@ -216,6 +253,25 @@ export default function Invoices() {
                 <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>Next</button>
             </div>
             <ToastContainer />
+            {showModal && (
+                <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0, 0, 0, 0.5)' }} tabIndex="-1">
+                    <div className="modal-dialog">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Confirm Delete</h5>
+                                <button type="button" className="btn-close" onClick={cancelDelete} aria-label="Close"></button>
+                            </div>
+                            <div className="modal-body">
+                                <p>Are you sure you want to delete this invoice?</p>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" onClick={cancelDelete}>Cancel</button>
+                                <button type="button" className="btn btn-danger" onClick={confirmDelete}>Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
