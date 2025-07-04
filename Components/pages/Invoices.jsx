@@ -54,7 +54,7 @@ export default function Invoices() {
         if (!userInfo) {
             fetchUserDetails();
         }
-    }, [userInfo, dispatch, navigate]);
+    }, []); // Run only once on mount
 
     const fetchInvoices = async (page = 1) => {
         try {
@@ -84,7 +84,7 @@ export default function Invoices() {
                 setTotalPages(1);
                 setTotalRecords(0);
             } else {
-                toast.error(error.response.data?.message);
+                toast.error(error.response?.data?.message || "Failed to fetch invoices.");
                 console.error("Error fetching invoices:", error);
             }
         }
@@ -129,7 +129,7 @@ export default function Invoices() {
                 toast.error("Something went wrong!");
             }
         } catch (error) {
-            toast.error(error.response?.data.message);
+            toast.error(error.response?.data?.message || "Failed to delete invoice.");
         }
     };
 
