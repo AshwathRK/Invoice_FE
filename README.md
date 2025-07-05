@@ -11,7 +11,7 @@ This project is an **Invoice Management System** that enables users to manage in
 * **Styling**: [Tailwind CSS](https://tailwindcss.com/)
 * **API Communication**: Axios
 * **Routing**: React Router
-* **State Management**: Redux (if applicable)
+* **State Management**: Redux
 * **PDF Export & Print**: Browser print dialog and file download functionality
 * **Database**: (Add if you're using MongoDB or another DB)
 
