@@ -13,7 +13,7 @@ This project is an **Invoice Management System** that enables users to manage in
 * **Routing**: React Router
 * **State Management**: Redux
 * **PDF Export & Print**: Browser print dialog and file download functionality
-* **Database**: (Add if you're using MongoDB or another DB)
+* **Database**: MongoDB
 
 ---
 
